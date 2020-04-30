@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="https://accounts.google.com/gsi/client"></script>
+  </head>
+  <script>
+    function handleCredentialResponse(res) {
+      const { credential = "" } = res;
+      localStorage.setItem("google_idToken", credential);
+      const options = {
+        client_id:
+          "983966883942-t4h1ssqs8e93v1b276kinfg5uu4u7kmo.apps.googleusercontent.com",
+        redirect_uri: "https://9e5fdd85.ngrok.io/",
+        scope: "email profile",
+        response_type: "code",
+        login_hint: "<LOGIN_HINT>",
+      };
+      const {
+        client_id,
+        redirect_uri,
+        scope,
+        response_type,
+        login_hint,
+      } = options;
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}&response_type=${response_type}&login_hint=${login_hint}`;
+    }
+
+    window.onload = function () {
+      const cred = localStorage.getItem("google_idToken");
+      if (!cred) {
+        google.accounts.id.initialize({
+          client_id:
+            "983966883942-t4h1ssqs8e93v1b276kinfg5uu4u7kmo.apps.googleusercontent.com",
+          callback: handleCredentialResponse,
+        });
+        google.accounts.id.prompt();
+      } else {
+        document.querySelector("span.yoloDisplay").innerText = cred;
+      }
+
+      const [code] = window.location.search.substring(1).split("&");
+      document.querySelector("span.accountsDisplay").innerText = code;
+
+      document.querySelector("button.logged").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = window.location.origin;
+      });
+    };
+  </script>
+  <body>
+    <h1><%= title %></h1>
+
+    <div><strong>Yolo token: </strong><span class="yoloDisplay"></span></div>
+
+    <div style="margin-top: 5px;">
+      <strong>account.google.com: </strong><span class="accountsDisplay"></span>
+    </div>
+
+    <div style="margin-top: 5px;">
+      <button class="logged">Clear</button>
+    </div>
+
+    <!-- <div
+      id="g_id_onload"
+      data-client_id="983966883942-adou0r3muiik8dek0mcga30bec5qu3l3.apps.googleusercontent.com"
+      data-native_callback="handleIDToken"
+    >
+      Sign in with Yolo
+    </div> -->
+  </body>
+</html>
